@@ -5,7 +5,7 @@ const bcrypt = require('bcrypt');
 
 // Função para exibir o formulário de registro
 exports.showRegisterForm = (req, res) => {
-    res.render('register'); // Assumindo que você tem um arquivo register.ejs na pasta views
+    res.render('page/register'); // Assumindo que você tem um arquivo register.ejs na pasta views
 };
 
 
@@ -58,7 +58,7 @@ exports.registerUser = async (req, res) => {
     } catch (error) {
         console.error(error);
         req.flash('error', 'Ocorreu um erro ao registrar o usuário. Por favor, tente novamente mais tarde.');
-        res.redirect('/register');
+        res.redirect('register');
     }
 };
 
@@ -98,5 +98,5 @@ exports.logoutUser = (req, res) => {
 
 exports.dashboard = (req, res) => {
     // Aqui você pode adicionar a lógica para renderizar o painel do usuário
-    return res.render('dashboard', { user: req.user });
+    return res.render('page/dashboard', { user: req.user });
 };

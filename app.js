@@ -52,9 +52,9 @@ app.use('/', userRoutes);
 // Rota raiz para a página de login
 app.get('/', (req, res) => {
     if(req.user){
-        res.redirect("/dashboard")
+        res.redirect("dashboard")
     }
-    res.render('login', { 
+    res.render('page/login', { 
         message: req.flash('error'),
         success: req.flash('success')
     });
