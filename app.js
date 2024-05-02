@@ -4,12 +4,15 @@ const session = require('express-session');
 const passport = require('passport');
 const flash = require('connect-flash');
 const userRoutes = require('./routes/userRoutes');
-
+const configRoutes = require("./routes/configRoutes")
 const app = express();
 
 // Configurações do Express
+app.use(express.json())
 app.set('view engine', 'ejs');
 app.use(express.urlencoded({ extended: true }));
+// Configuração para servir arquivos estáticos da pasta 'public'
+app.use(express.static('public'));
 
 // Conexão com o MongoDB
 mongoose.connect('mongodb+srv://dgmap:UvAZYbnl66Ll2LjE@mpgd.oauqahr.mongodb.net/?retryWrites=true&w=majority&appName=mpgd')
@@ -47,10 +50,14 @@ app.use((req, res, next) => {
 
 // Rotas da aplicação
 app.use('/', userRoutes);
+app.use('/config', configRoutes);
 
 // Rota raiz para a página de login
 app.get('/', (req, res) => {
-    res.render('login', { 
+    if(req.user){
+        res.redirect("dashboard")
+    }
+    res.render('page/login', { 
         message: req.flash('error'),
         success: req.flash('success')
     });

@@ -5,40 +5,30 @@ const bcrypt = require('bcrypt');
 
 // Função para exibir o formulário de registro
 exports.showRegisterForm = (req, res) => {
-    res.render('register'); // Assumindo que você tem um arquivo register.ejs na pasta views
+    res.render('page/register'); // Assumindo que você tem um arquivo register.ejs na pasta views
 };
 
 
 exports.registerUser = async (req, res) => {
-
     // Lógica de verificação de usuário existente e registro de usuário
-    const { name, email, password, confirmPassword, team, profile } = req.body;
-
+    const { name, email, password, team, profile } = req.body;
+    
     // Verifica se todos os campos estão preenchidos
-    if (!name || !email || !password || !confirmPassword || !team || !profile) {
-        req.flash('error', 'Por favor, preencha todos os campos.');
-        return res.redirect('/register');
-    }
-
-    // Verifica se a senha e a confirmação de senha coincidem
-    if (password !== confirmPassword) {
-        req.flash('error', 'As senhas não coincidem.');
-        return res.redirect('/register');
+    if (!name || !email || !password || !team || !profile) {
+        return res.status(400).json({ error: 'Por favor, preencha todos os campos.' });
     }
 
     try {
         // Verifica se o email já está cadastrado
         const existingEmail = await User.findOne({ email });
         if (existingEmail) {
-            req.flash('error', 'Este email já está em uso.');
-            return res.redirect('/register');
+            return res.status(400).json({ error: 'Este email já está em uso.' });
         }
 
         // Verifica se o nome já está cadastrado
         const existingName = await User.findOne({ name });
         if (existingName) {
-            req.flash('error', 'Este nome já está em uso.');
-            return res.redirect('/register');
+            return res.status(400).json({ error: 'Este nome já está em uso.' });
         }
 
         // Se não houver nenhum conflito, cria um novo usuário
@@ -53,33 +43,31 @@ exports.registerUser = async (req, res) => {
         });
 
         await newUser.save();
-        req.flash('success', 'Usuário registrado com sucesso.');
-        res.redirect('/');
+        return res.status(200).json({ message: 'Usuário registrado com sucesso.' });
     } catch (error) {
         console.error(error);
-        req.flash('error', 'Ocorreu um erro ao registrar o usuário. Por favor, tente novamente mais tarde.');
-        res.redirect('/register');
+        return res.status(500).json({ error: 'Ocorreu um erro ao registrar o usuário. Por favor, tente novamente mais tarde.' });
     }
 };
+
 
 exports.loginUser = (req, res, next) => {
     passport.authenticate('local', (err, user, info) => {
         if (err) {
-            return next(err);
+            return res.status(500).json({ error: 'Ocorreu um erro durante o login.' });
         }
         if (!user) {
-            req.flash('error', 'Email ou senha incorretos');
-            return res.redirect('/');
+            return res.status(401).json({ error: 'Email ou senha incorretos.' });
         }
         req.logIn(user, (err) => {
             if (err) {
-                return next(err);
+                return res.status(500).json({ error: 'Ocorreu um erro durante o login.' });
             }
-            req.flash('success', 'Login realizado com sucesso.');
-            return res.redirect('/dashboard');
+            return res.status(200).json({ success: 'Login realizado com sucesso.' });
         });
     })(req, res, next);
 };
+
 
 
 // userController.js
@@ -98,5 +86,5 @@ exports.logoutUser = (req, res) => {
 
 exports.dashboard = (req, res) => {
     // Aqui você pode adicionar a lógica para renderizar o painel do usuário
-    return res.render('dashboard', { user: req.user });
+    return res.render('page/dashboard', { user: req.user });
 };
